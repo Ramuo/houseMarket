@@ -1,9 +1,13 @@
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {useNavigate, Link} from 'react-router-dom';
 import {getAuth, updateProfile} from 'firebase/auth';
 import {updateDoc, doc} from 'firebase/firestore';
-import {db} from '../firebase.config';
+import { db } from '../firebase.config'
 import {toast} from 'react-toastify';
+import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg';
+import homeIcon from '../assets/svg/homeIcon.svg';
+
+
 
 
 
@@ -11,15 +15,15 @@ function Profile() {
   const auth = getAuth();
 
   // State
-  const [changeDetails, setChangeDetails] = useState(false);
+  const [changeDetails, setChangeDetails] = useState(false)
   const [formData, setFormData] = useState({
     name: auth.currentUser.displayName,
     email: auth.currentUser.email,
-  });
+  })
 
-  const {name, email} = formData;
+  const { name, email } = formData
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   // Functions
   // logOut function
@@ -29,28 +33,29 @@ function Profile() {
   }
 
   // function to change profile details then update in firebase
-  const onSubmit = async ()=>{
+  const onSubmit = async () => {
     try {
-      if(auth.currentUser.displayName !== name){
-        //Update display name in firebase
+      if (auth.currentUser.displayName !== name) {
+        // Update display name in fb
         await updateProfile(auth.currentUser, {
           displayName: name,
         })
-        // Update in Firestore
+
+        // Update in firestore
         const userRef = doc(db, 'users', auth.currentUser.uid)
         await updateDoc(userRef, {
-          name: name
+          name,
         })
       }
     } catch (error) {
+      console.log(error)
       toast.error('Impossible de mettre à jour le profil, Réessayer!')
-      
     }
   }
 
   // function to updateFormData state
-  const onChange = (e)=>{
-    setFormData((prevState)=>({
+  const onChange = (e) => {
+    setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }))
@@ -104,6 +109,20 @@ function Profile() {
               />
             </form>
           </div>
+
+          <Link to='/create-listing' className='createListing'>
+            <img 
+            src={homeIcon}
+            alt="home" 
+            />
+
+            <p>Louer ou Vender votre maison</p>
+
+            <img 
+            src={arrowRight} 
+            alt="arrow right" 
+            />
+          </Link>
         </main>
     </div>
 }

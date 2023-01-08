@@ -16,7 +16,7 @@ import ListingItem from '../components/ListingItem'
 
 
 
-function Offers() {
+function Category() {
     const [listings, setListings] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -31,7 +31,7 @@ function Offers() {
             // Create a query
             const q = query(
               listingsRef,
-              where('offer', '==', true),
+              where('type', '==', params.categoryName),
               orderBy('timestamp', 'desc'),
               limit(10)
             )
@@ -57,13 +57,15 @@ function Offers() {
         }
     
         fetchListings()
-      }, [])
+      }, [params.categoryName])
 
     return (
     <div className='category'>
         <header>
             <p className='pageHeader'>
-               Offres
+                {params.categoryName === 'rent'
+                    ? 'À Louer'
+                    : 'À Vendre'}
             </p>
       </header>
 
@@ -80,12 +82,12 @@ function Offers() {
             ))}
         </ul>
     </main>
-    </>:  <p>Il n'y a pas d'offre pour le moment.</p>
+    </>:  <p>Aucun élément dans la liste</p>
     }
     </div>
     )
 }
 
-export default Offers
+export default Category
 
 

@@ -12,6 +12,7 @@ body {
   background-color: #f2f4f8;
   margin: 0;
   box-sizing: border-box;
+  /* min-height: 145vh; */
 }
 
 a {
@@ -61,7 +62,7 @@ button {
   cursor: pointer;
   background: #00cc66;
   border-radius: 1rem;
-  padding: 0.85rem 2rem;
+  padding: 0.85rem 2rem; 
   color: #ffffff;
   font-weight: 600;
   font-size: 1.25rem;
@@ -84,6 +85,11 @@ button {
   top: -3.4%;
   right: 20px;
 }
+/******/
+.pageContainer{
+  min-height: 145vh;
+}
+/******/
 
 .pageContainer,
 .offers,
