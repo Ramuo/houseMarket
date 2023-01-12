@@ -118,9 +118,7 @@ function CreateListing() {
 
     }else{
       geolocation.lat = latitude;
-      geolocation.lng = longitude;
-      location = address
-      
+      geolocation.lng = longitude; 
     }
 
     // To Store image firebase
@@ -189,7 +187,7 @@ function CreateListing() {
 
 
     setLoading(false)
-    toast.success('Listing saved')
+    toast.success('Enregistré!')
     navigate(`/category/${formDataCopy.type}/${docRef.id}`)
 
   }
