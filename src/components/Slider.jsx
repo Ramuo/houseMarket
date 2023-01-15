@@ -41,8 +41,9 @@ function Slider() {
         return <Spinner/>
     }
 
-    // Functions
-
+    if(listings.length === 0){
+        return <></>
+    }
 
     // Rendered elements
     return listings && (

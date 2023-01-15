@@ -8,6 +8,7 @@ function Contact() {
     // State
     const [message, setMessage] = useState('');
     const [landlord, setLandlord] = useState(null);
+    // eslint-disable-next-line 
     const [searchParams, setSearchParams] = useSearchParams();
 
     const params = useParams();
@@ -43,7 +44,7 @@ function Contact() {
         </header>
 
         {landlord !== null && (
-            <main>
+            <main style={{minHeight: '100%'}}>
                <div className="contactLandlord">
                     <p className="landlordName">Contact {landlord?.name}</p>
                 </div>

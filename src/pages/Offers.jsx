@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+
 import {
   collection,
   getDocs,
@@ -17,10 +17,11 @@ import ListingItem from '../components/ListingItem'
 
 
 function Offers() {
-    const [listings, setListings] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const [listings, setListings] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [lastFetchLinsting, setLastFetchListing] = useState(null);
 
-    const params = useParams();
+   
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -38,6 +39,10 @@ function Offers() {
     
             // Execute query
             const querySnap = await getDocs(q)
+
+            // set visible listing
+            const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+            setLastFetchListing(lastVisible);
     
             const listings = []
     
@@ -57,7 +62,46 @@ function Offers() {
         }
     
         fetchListings()
-      }, [])
+      }, []);
+
+      // Pagination/ Load More
+      const onFetchMoreListings = async () => {
+        try {
+          // Get reference
+          const listingsRef = collection(db, 'listings')
+  
+          // Create a query
+          const q = query(
+            listingsRef,
+            where('offer', '==', true),
+            orderBy('timestamp', 'desc'),
+            startAfter(lastFetchLinsting),
+            limit(10)
+          )
+  
+          // Execute query
+          const querySnap = await getDocs(q)
+
+          // set visible listing
+          const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+          setLastFetchListing(lastVisible);
+  
+          const listings = [];
+            
+          querySnap.forEach((doc) => {
+            return listings.push({
+              id: doc.id,
+              data: doc.data(),
+            })
+          })
+  
+          setListings((prevState)=> [...prevState, ...listings]);
+          setLoading(false);
+
+        } catch (error) {
+          toast.error("Une erreur s'est produite, réessayer")
+        }
+      }
 
     return (
     <div className='category'>
@@ -80,6 +124,13 @@ function Offers() {
             ))}
         </ul>
     </main>
+
+    <br />
+    <br />
+    {lastFetchLinsting && (
+      <p className="loadMore" onClick={onFetchMoreListings}>Voir Plus</p>
+    )}
+
     </>:  <p>Il n'y a pas d'offre pour le moment.</p>
     }
     </div>

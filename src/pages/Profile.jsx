@@ -110,11 +110,15 @@ function Profile() {
       toast.success('Supprimé avec succès!');
     }
   }
+  // on edit function
+  const onEdit = (listingId)=>{
+    navigate(`/edit-listing/${listingId}`)
+  }
 
   // rendered elements
   return <div className='profile'>
         <header className="profileHeader">
-          <p className="pageHeader">My Profile</p>
+          <p className="pageHeader">Mon Profil</p>
           <button 
           type='button' 
           className="logOut"
@@ -184,6 +188,7 @@ function Profile() {
                   listing={listing.data}
                   id={listing.id}
                   onDelete={()=>onDelete(listing.id)}
+                  onEdit={()=>onEdit(listing.id)}
                   />
                 ))}
               </ul>

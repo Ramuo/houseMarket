@@ -17,8 +17,9 @@ import ListingItem from '../components/ListingItem'
 
 
 function Category() {
-    const [listings, setListings] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const [listings, setListings] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [lastFetchLinsting, setLastFetchListing] = useState(null);
 
     const params = useParams();
 
@@ -38,6 +39,10 @@ function Category() {
     
             // Execute query
             const querySnap = await getDocs(q)
+
+            // set visible listing
+            const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+            setLastFetchListing(lastVisible);
     
             const listings = [];
               
@@ -57,7 +62,47 @@ function Category() {
         }
     
         fetchListings()
-      }, [params.categoryName])
+      }, [params.categoryName]);
+
+      // Pagination/ Load More
+      const onFetchMoreListings = async () => {
+        try {
+          // Get reference
+          const listingsRef = collection(db, 'listings')
+  
+          // Create a query
+          const q = query(
+            listingsRef,
+            where('type', '==', params.categoryName),
+            orderBy('timestamp', 'desc'),
+            startAfter(lastFetchLinsting),
+            limit(10)
+          )
+  
+          // Execute query
+          const querySnap = await getDocs(q)
+
+          // set visible listing
+          const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+          setLastFetchListing(lastVisible);
+  
+          const listings = [];
+            
+          querySnap.forEach((doc) => {
+            return listings.push({
+              id: doc.id,
+              data: doc.data(),
+            })
+          })
+  
+          setListings((prevState)=> [...prevState, ...listings]);
+          setLoading(false);
+
+        } catch (error) {
+          toast.error("Une erreur s'est produite, réessayer")
+        }
+      }
+
 
     return (
     <div className='category'>
@@ -82,6 +127,13 @@ function Category() {
             ))}
         </ul>
     </main>
+    
+    <br />
+    <br />
+    {lastFetchLinsting && (
+      <p className="loadMore" onClick={onFetchMoreListings}>Voir Plus</p>
+    )}
+
     </>:  <p>Aucun élément dans la liste</p>
     }
     </div>

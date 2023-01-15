@@ -6,10 +6,10 @@ import {
   uploadBytesResumable, 
   getDownloadURL 
 } from "firebase/storage";
-import {addDoc, collection, serverTimestamp} from 'firebase/firestore';
+import {doc, updateDoc, getDoc, serverTimestamp} from 'firebase/firestore';
 import {v4 as uuidv4} from 'uuid';
 import {db} from  '../firebase.config';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Spinner from '../components/Spinner';
 import {toast} from 'react-toastify';
 
@@ -31,11 +31,11 @@ const initialFormState = {
 };
 
 
-function CreateListing() {
- 
+function EditListing() {
   // eslint-disable-next-line 
   const [geolocationEnabled, setGeolocationEnabled] = useState(true);
   const [formData, setFormData] = useState(initialFormState);
+  const [listing, setListing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // let'us destructure forData
@@ -57,7 +57,35 @@ function CreateListing() {
 
   const auth = getAuth();
   const navigate = useNavigate();
- 
+  const params = useParams();
+
+  // useEffect to redirect if listing is not user's
+  useEffect(() => {
+    if (listing && listing.userRef !== auth.currentUser.uid) {
+      toast.error('Vous ne pouvez pas editer cette liste.')
+      navigate('/')
+    }
+  })
+
+  //useEffect for editing listing/ Fetch listing to edit
+  useEffect(()=>{
+    setLoading(true);
+    const fetchListing = async ()=>{
+        const docRef = doc(db, 'listings', params.listingId);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()){
+           setListing(docSnap.data());
+           setFormData({...docSnap.data(), address: docSnap.data().location })
+           setLoading(false);
+        }else{
+            navigate('/');
+            toast.error("La liste n'existe pas.")
+        }
+    }
+    fetchListing();
+  }, [params.listingId, navigate]);
+
+ // useEffect for authentification / Sets userRef to logged in user
   useEffect(()=>{
     const unsubscribe = onAuthStateChanged(auth, (user)=>{
       if(user){
@@ -69,7 +97,7 @@ function CreateListing() {
 
     return unsubscribe;
 
-  }, [auth, navigate])
+  }, [auth, navigate]);
 
 
   
@@ -144,7 +172,7 @@ function CreateListing() {
           case 'running':
             console.log('Upload is running');
             break
-          default:
+        default:
             break
         }
       }, 
@@ -184,13 +212,12 @@ function CreateListing() {
   delete formDataCopy.address
   !formDataCopy.offer && delete formDataCopy.discountedPrice
 
-    // Let's save to the Database
-    const docRef = await addDoc(collection(db, 'listings'), formDataCopy)
-    
+    // Let's save edite listing to the Database
+    const docRef = doc(db, 'listings', params.listingId)
+    await updateDoc(docRef, formDataCopy)
 
-
-    setLoading(false)
-    toast.success('Enregistré!')
+    setLoading(false);
+    toast.success('Enregistré avec succès!');
     navigate(`/category/${formDataCopy.type}/${docRef.id}`)
 
   }
@@ -231,7 +258,7 @@ function CreateListing() {
   return (
     <div className='profile'>
       <header>
-        <p className="pageHeader">Créer une liste </p>
+        <p className="pageHeader">Editer la liste </p>
       </header>
 
       <main>
@@ -459,7 +486,7 @@ function CreateListing() {
             required
           />
           <button type='submit' className='primaryButton createListingButton'>
-            Créer la Liste
+            Editer la Liste
           </button>
         </form>
       </main>
@@ -467,7 +494,7 @@ function CreateListing() {
 )
 } 
 
-export default CreateListing
+export default EditListing
 
 
 
